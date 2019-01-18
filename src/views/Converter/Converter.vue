@@ -182,7 +182,12 @@ export default {
   position: absolute;
   left: -18px;
   top: 22px;
-  /* animation: flip 250ms; */
+}
+#converter .center-reverse:hover {
+  background-color: #eeeeee;
+}
+#converter .center-reverse.flip {
+  animation: flip 250ms;
 }
 #converter .center-line {
   background: linear-gradient(180deg, #e1e8ed, #f8fafc);
@@ -190,12 +195,6 @@ export default {
   top: 80px;
   height: calc(100% - 80px);
   width: 1px;
-}
-#converter .center-btn:hover {
-  background-color: #eeeeee;
-}
-#converter .center-btn.flip {
-  animation: flip 250ms;
 }
 #converter .setting-btn {
   background-position: -72px 0;
