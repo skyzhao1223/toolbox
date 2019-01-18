@@ -1,6 +1,8 @@
 <template>
   <div class="side">
-    <slide-tab class="side-top" :items="units" :active="unit" @change="changeUnit"/>
+    <div class="side-top">
+      <slide-tab :items="units" :active="unit" @change="changeUnit"/>
+    </div>
     <textarea
       ref="ta"
       :value="content"

@@ -1,8 +1,14 @@
 <template>
   <div id="converter">
-    <one-side :unit="from" v-model="origin" @changeUnit="changeFrom" @changeContent="changeContent">
+    <one-side
+      class="left"
+      :unit="from"
+      v-model="origin"
+      @changeUnit="changeFrom"
+      @changeContent="changeContent"
+    >
       <div class="ratio-setter">
-        <div class="clear-btn hover">
+        <div class="icon clear-btn hover" v-if="origin" @click="origin=''">
           <div class="hover-text">Clear</div>
         </div>
         <b>1</b>
@@ -11,9 +17,9 @@
         {{from}}
       </div>
     </one-side>
-    <one-side class="reverse" :unit="to" :content="result" @changeUnit="changeTo">
+    <one-side class="right" :unit="to" :content="result" @changeUnit="changeTo">
       <div class="ratio-setter">
-        <div class="copy-btn hover">
+        <div class="icon copy-btn hover">
           <div class="hover-text">Copy Code</div>
         </div>
         <b>1</b>
@@ -23,9 +29,10 @@
       </div>
     </one-side>
     <div class="center">
-      <div class="center-btn" :class="{flip}" @click="reverse"></div>
+      <div class="center-reverse" :class="{flip}" @click="reverse"></div>
       <div class="center-line"></div>
     </div>
+    <div class="setting-btn"></div>
   </div>
 </template>
 <script>
@@ -142,18 +149,20 @@ export default {
   width: 48px;
 }
 #converter .ratio-setter [class*="btn"] {
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  background-image: url(~@/assets/copy.svg);
-  background-repeat: no-repeat;
-  background-size: 24px;
   position: absolute;
   left: -40px;
 }
 #converter .clear-btn {
+  background-position: 0 0;
+}
+#converter .clear-btn:hover {
+  background-position: 0 -24px;
 }
 #converter .copy-btn {
+  background-position: -48px 0;
+}
+#converter .copy-btn:hover {
+  background-position: -48px -24px;
 }
 #converter .center {
   position: absolute;
@@ -161,7 +170,7 @@ export default {
   left: 50%;
   top: 0;
 }
-#converter .center-btn {
+#converter .center-reverse {
   height: 36px;
   width: 36px;
   border: 1px solid #e1e8ed;
@@ -171,7 +180,7 @@ export default {
   background-position: 6px;
   background-size: 24px;
   position: absolute;
-  left: -36px;
+  left: -18px;
   top: 22px;
   /* animation: flip 250ms; */
 }
@@ -187,6 +196,15 @@ export default {
 }
 #converter .center-btn.flip {
   animation: flip 250ms;
+}
+#converter .setting-btn {
+  background-position: -72px 0;
+  position: absolute;
+  right: 27px;
+  top: 28px;
+}
+#converter .setting-btn:hover {
+  background-position: -72px -24px;
 }
 .hover {
   position: relative;
@@ -222,6 +240,14 @@ export default {
 .hover:hover .hover-text {
   display: block;
 }
+#converter [class*="btn"] {
+  background-image: url(~@/assets/icon.svg);
+  background-repeat: no-repeat;
+  background-size: 96px 48px;
+  cursor: pointer;
+  height: 24px;
+  width: 24px;
+}
 @keyframes flip {
   0% {
     transform-origin: center;
@@ -234,10 +260,13 @@ export default {
 }
 </style>
 <style>
-.side:first-child textarea {
+.side.left textarea {
   padding-left: 0;
 }
-.side:last-child textarea {
+.side.right .side-top {
+  padding-left: 24px;
+}
+.side.right textarea {
   padding-right: 0;
 }
 </style>
