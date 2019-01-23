@@ -39,7 +39,7 @@ ul {
   padding: 0;
   list-style: none;
 }
-textarea, input {
+textarea, input, pre {
   outline: none;
   border: 0;
 }

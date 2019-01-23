@@ -1,12 +1,6 @@
 <template>
   <div id="converter">
-    <one-side
-      class="left"
-      :unit="from"
-      v-model="origin"
-      @changeUnit="changeFrom"
-      @changeContent="changeContent"
-    >
+    <one-side class="left" :unit="from" v-model="origin" @changeUnit="changeFrom" :editable="true">
       <div class="ratio-setter">
         <div class="icon clear-btn hover" v-if="origin" @click="origin=''">
           <div class="hover-text">Clear</div>
@@ -17,9 +11,9 @@
         {{from}}
       </div>
     </one-side>
-    <one-side class="right" :unit="to" :content="result" @changeUnit="changeTo">
+    <one-side class="right" :unit="to" :content="result" @changeUnit="changeTo" :editable="false">
       <div class="ratio-setter">
-        <div class="icon copy-btn hover">
+        <div id="copy" class="icon copy-btn hover" @click="copyResult" :data-clipboard-text="result">
           <div class="hover-text">Copy Code</div>
         </div>
         <b>1</b>
@@ -29,7 +23,9 @@
       </div>
     </one-side>
     <div class="center">
-      <div class="center-reverse" :class="{flip}" @click="reverse"></div>
+      <div class="center-reverse" :class="{flip}" @click="reverse">
+        <div class="reverse-btn"></div>
+      </div>
       <div class="center-line"></div>
     </div>
     <div class="setting-btn"></div>
@@ -37,6 +33,7 @@
 </template>
 <script>
 import OneSide from "./OneSide";
+import ClipboardJS from "clipboard";
 export default {
   components: {
     OneSide
@@ -46,7 +43,13 @@ export default {
       from: "px",
       to: "rem",
       ratio: 1 / 16,
-      origin: "20px 20rem",
+      origin: `#converter {
+  height: calc(100vh - 206px);
+  background: linear-gradient(180deg, white, #f8fafc);
+  box-sizing: border-box;
+  padding: 0 24px 26px;
+  position: relative;
+}`,
       result: "",
       flip: false
     };
@@ -72,6 +75,9 @@ export default {
   watch: {
     ratio() {
       this.changeContent();
+    },
+    origin() {
+      this.changeContent();
     }
   },
   methods: {
@@ -96,6 +102,17 @@ export default {
         this.changeTo(this.from);
         this.changeFrom(to);
       }
+    },
+    copyResult() {
+      let clipboard = new ClipboardJS('#copy');
+      clipboard.on('success', e => {
+        console.log(e);
+        alert('复制成功')
+      })
+      clipboard.on('error', e => {
+        console.log(e);
+        alert('复制失败')
+      })
     },
     changeContent() {
       const originType = this.from.toLowerCase();
@@ -152,18 +169,6 @@ export default {
   position: absolute;
   left: -40px;
 }
-#converter .clear-btn {
-  background-position: 0 0;
-}
-#converter .clear-btn:hover {
-  background-position: 0 -24px;
-}
-#converter .copy-btn {
-  background-position: -48px 0;
-}
-#converter .copy-btn:hover {
-  background-position: -48px -24px;
-}
 #converter .center {
   position: absolute;
   height: 100%;
@@ -174,17 +179,24 @@ export default {
   height: 36px;
   width: 36px;
   border: 1px solid #e1e8ed;
+  cursor: pointer;
   border-radius: 50%;
-  background-image: url(~@/assets/switch-s.svg);
-  background-repeat: no-repeat;
-  background-position: 6px;
-  background-size: 24px;
   position: absolute;
+  transition: opacity 250ms;
   left: -18px;
   top: 22px;
 }
+#converter .center-reverse .reverse-btn {
+  transition: opacity 250ms;
+  position: absolute;
+  left: 6px;
+  top: 6px;
+}
 #converter .center-reverse:hover {
   background-color: #eeeeee;
+}
+#converter .center-reverse:hover .reverse-btn:before {
+  opacity: 1;
 }
 #converter .center-reverse.flip {
   animation: flip 250ms;
@@ -197,14 +209,74 @@ export default {
   width: 1px;
 }
 #converter .setting-btn {
-  background-position: -72px 0;
   position: absolute;
   right: 27px;
+  left: auto;
   top: 28px;
 }
-#converter .setting-btn:hover {
+@keyframes flip {
+  0% {
+    transform-origin: center;
+    transform: rotate3d(0, 0, 0, 0deg);
+  }
+  100% {
+    transform-origin: center;
+    transform: rotate3d(0, 0, 1, 180deg);
+  }
+}
+</style>
+<style>
+#converter [class*="btn"],
+#converter [class*="btn"]::before {
+  background-image: url(~@/assets/icon.svg);
+  background-repeat: no-repeat;
+  background-size: 96px 48px;
+  transition: opacity 250ms;
+  overflow: hidden;
+  cursor: pointer;
+  height: 24px;
+  width: 24px;
+}
+#converter [class*="btn"]::before {
+  content: "";
+  display: block;
+  position: absolute;
+  transition: opacity 250ms;
+  height: 22px;
+  width: 48px;
+  left: 0;
+  top: 0;
+  opacity: 0;
+}
+#converter [class*="btn"]:hover::before {
+  opacity: 1;
+}
+#converter .clear-btn {
+  background-position: 0 0;
+}
+#converter .clear-btn::before {
+  background-position: 0 -24px;
+}
+#converter .copy-btn {
+  background-position: -48px 0;
+}
+#converter .copy-btn::before {
+  background-position: -48px -24px;
+}
+#converter .reverse-btn {
+  background-position: -24px 0;
+}
+#converter .reverse-btn:before {
+  background-position: -24px -24px;
+}
+#converter .setting-btn {
+  background-position: -72px 0;
+}
+#converter .setting-btn::before {
   background-position: -72px -24px;
 }
+</style>
+<style>
 .hover {
   position: relative;
 }
@@ -239,33 +311,17 @@ export default {
 .hover:hover .hover-text {
   display: block;
 }
-#converter [class*="btn"] {
-  background-image: url(~@/assets/icon.svg);
-  background-repeat: no-repeat;
-  background-size: 96px 48px;
-  cursor: pointer;
-  height: 24px;
-  width: 24px;
-}
-@keyframes flip {
-  0% {
-    transform-origin: center;
-    transform: rotate3d(0, 0, 0, 0deg);
-  }
-  100% {
-    transform-origin: center;
-    transform: rotate3d(0, 0, 1, 180deg);
-  }
-}
 </style>
 <style>
-.side.left textarea {
+.side.left textarea,
+.side.left pre {
   padding-left: 0;
 }
 .side.right .side-top {
   padding-left: 24px;
 }
-.side.right textarea {
+.side.right textarea,
+.side.right pre {
   padding-right: 0;
 }
 </style>

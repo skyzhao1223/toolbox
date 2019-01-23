@@ -3,20 +3,23 @@
     <div class="side-top">
       <slide-tab :items="units" :active="unit" @change="changeUnit"/>
     </div>
-    <textarea
-      ref="ta"
-      :value="content"
-      @input="$emit('changeContent',$event.target.value)"
-      name
-      id
-      cols="30"
-      rows="10"
-    ></textarea>
+    <div class="code-container" @click="setEditStatus(true)">
+      <pre v-html="html" v-show="!editing"></pre>
+      <textarea
+        ref="textarea"
+        :value="content"
+        @input="changeContent"
+        v-if="editable"
+        v-show="editing"
+        @blur="setEditStatus(false)"
+      ></textarea>
+    </div>
     <slot/>
   </div>
 </template>
 <script>
 import SlideTab from "@/components/SlideTab";
+import Prism from "prismjs";
 const units = ["px", "em", "rem", "rpx"];
 export default {
   model: {
@@ -26,23 +29,43 @@ export default {
   components: {
     SlideTab
   },
-  props: ["unit", "content"],
+  props: ["unit", "content", "editable"],
   data() {
     return {
       units,
+      editing: false
     };
+  },
+  computed: {
+    html() {
+      return Prism.highlight(this.content, Prism.languages.css, 'css')
+    }
   },
   watch: {
     unit() {
-      this.changeContent();
+      this.editable&&this.changeContent();
+    },
+    editing(value) {
+      if (value) {
+        let area = this.$refs.textarea
+        this.$nextTick(()=>{
+          area.focus()
+          area.select()
+        })
+      }
     }
   },
   methods: {
+    setEditStatus(bool) {
+      if (this.editable) {
+        this.editing = bool
+      }
+    },
     changeUnit(e) {
       this.$emit("changeUnit", e);
     },
     changeContent() {
-      const c = this.$refs.ta.value;
+      const c = this.$refs.textarea.value;
       this.$emit("changeContent", c);
     }
   }
@@ -61,19 +84,34 @@ export default {
 .side-top .tab-item {
   text-transform: uppercase;
   display: inline-block;
+  font-weight: 600;
   padding: 0 16px;
   cursor: pointer;
 }
+.tab-item:hover,
 .active {
   color: #006aff;
 }
-textarea {
+.code-container {
+  height: calc(100% - 80px);
+  position: relative;
+}
+textarea, pre {
+  display: block;
+  font-family: 'monospace';
+  white-space: pre;
+  height: 100%;
+  margin: 0;
   background-color: transparent;
   font-size: 14px;
   box-sizing: border-box;
-  height: calc(100% - 80px);
   padding: 26px 24px;
   resize: none;
   width: 100%;
+}
+textarea {
+  position: absolute;
+  left: 0;
+  top: 0;
 }
 </style>
